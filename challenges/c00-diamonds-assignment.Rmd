@@ -1,7 +1,7 @@
 ---
 title: "Getting Started: Diamonds"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 2020-10 July
 output:
   github_document:
     toc: true
@@ -57,22 +57,83 @@ __q1__ Create a plot of `price` vs `carat` of the `diamonds` dataset below. Docu
 ```{r q1-task}
 ## TASK: Plot `price` vs `carat` below
 ## Your code here!
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = carat, y = price))
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Price and carat are correlated. Diamonds are more likely to be just over 1, 1.5, 2 or 2.5 carats than just under those values. Data is generally hard to see
 
 __q2__ Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
 ```{r q2-task}
 ## TASK: Plot `price`, `carat`, and `cut` below
 ## Your code here!
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = carat, y = price, color = cut))
 ```
+
+```{r q2-taskb}
+## TASK: Plot `price`, `carat`, and `cut` below
+## Your code here!
+ggplot(data = diamonds) +
+  geom_boxplot(mapping = aes(x = cut, y = carat))
+```
+
+**My silly way of cutting the data**
+```{r q2-taskc}
+## TASK: Plot `price`, `carat`, and `cut` below
+## Your code here!
+diamonds_ideal <- diamonds %>%
+  #as_tibble() %>%
+  filter(
+    cut == "Ideal"
+  )
+
+#diamonds_ideal
+diamonds_premium <- diamonds %>%
+  #as_tibble() %>%
+  filter(
+    cut == "Premium"
+  )
+
+diamonds_very_good <- diamonds %>%
+  #as_tibble() %>%
+  filter(
+    cut == "Very Good"
+  )
+
+diamonds_good <- diamonds %>%
+  #as_tibble() %>%
+  filter(
+    cut == "Good"
+  )
+
+diamonds_fair <- diamonds %>%
+  #as_tibble() %>%
+  filter(
+    cut == "Fair"
+  )
+
+ggplot() +
+  geom_smooth(data = diamonds_ideal, mapping = aes(x = carat, y = price), color = "red") +
+  geom_smooth(data = diamonds_premium, mapping = aes(x = carat, y = price), color = "yellow") +
+  geom_smooth(data = diamonds_very_good, mapping = aes(x = carat, y = price), color = "green") +
+  geom_smooth(data = diamonds_good, mapping = aes(x = carat, y = price), color = "blue") +
+  geom_smooth(data = diamonds_fair, mapping = aes(x = carat, y = price), color = "black") +
+scale_fill_discrete(name="Cut",
+                         breaks = c("ctrl", "trt1", "trt2"),
+                         labels = c("Control", "Treatment 1", "Treatment 2"))
+```
+Where Red is "Ideal", Yellow is "Premium", Green is "Very Good", Blue is "Good" and Black is "Fair".
+
 
 **Observations**:
 
-- (Write your observations here!)
+- diamond price increases mostly with carat.
+- Seems to be a secondary effect of cut on price.
+- Larger diamonds do not have nice cuts.
 
 
 # Communication
