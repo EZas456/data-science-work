@@ -40,6 +40,7 @@ filter(diamonds, cut == "Ideal")
 diamonds %>% filter(cut == "Ideal")
 ```
 
+The first filters the diamonds data frame, where the second establishes a data frame *then* filters by cut. They have the same result.
 
 The reading mentioned various kinds of *summary functions*, which are summarized
 in the table below:
@@ -58,6 +59,8 @@ __q2__ Using `summarize()` and a logical summary function, determine the number
 of rows with `Ideal` `cut`. Save this value to a column called `n_ideal`.
 
 ```{r q2-task}
+df_q2 <- diamonds %>%
+  summarise(n_ideal = sum(cut == "Ideal"))
 df_q2
 ```
 
@@ -79,7 +82,7 @@ Uncomment the `group_by()` below, and describe how the result changes.
 
 ```{r q3-task}
 diamonds %>%
-  ## group_by(color, clarity) %>%
+  group_by(color, clarity) %>%
   summarize(price = mean(price))
 ```
 
@@ -103,6 +106,14 @@ to `df_q4`.
 
 ```{r q4-task}
 ## TODO: Assign result to df_q4
+df_q4 <- diamonds %>%
+  mutate(depth_computed = 2 * z / (x + y), 
+         diff = depth - depth_computed
+         ) %>%
+  summarize(diff_mean = mean(diff, na.rm = TRUE),
+            diff_sd = sd(diff, na.rm = TRUE),
+            cov = diff_sd / diff_mean
+  )
 df_q4
 ```
 
@@ -133,6 +144,13 @@ can you make about the various cuts? Do those observations match your expectatio
 
 ```{r q5-task}
 ## TODO: Assign result to df_q5
+df_q5 <- diamonds %>%
+  group_by(cut) %>%
+  summarize(
+    price_mean = mean(price),
+    price_sd = sd(price), 
+    price_cov = price_sd / price_mean
+    )
 df_q5
 ```
 
@@ -157,7 +175,9 @@ print("Excellent!")
 
 **Observations**:
 
-- Write your observations here!
+- It's interesting that the ideal diamonds vary in price more than other diamonds.
+- Fair and Premium diamonds seem to have the highest sale prices (while all other cuts are not that much lower) which implies that cut iteslf does not have a significant effect on price. 
+-In fact, it seems to have a slighty negative correlation with price (perhaps due to needing to remove more material to make a nicer cut since this data is not normalized by carat)
 
 <!-- include-exit-ticket -->
 # Exit Ticket
