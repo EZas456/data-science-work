@@ -30,9 +30,16 @@ __q1__ In the reading, you learned the relation between `geom_bar()` and
 the same visual using `geom_col()`.
 
 ```{r q1-task}
+#original code
 mpg %>%
   ggplot(aes(trans)) +
   geom_bar()
+
+#altered code
+mpg %>%
+  count(trans) %>%
+  ggplot() +
+  geom_col(mapping = aes(x = trans, y = n))
 ```
 
 The reading mentioned that when using `geom_col()` our x-y data should be
@@ -53,13 +60,19 @@ __q2__ The following code attempts to visualize `cty, hwy` from `mpg` using
 *Hint*: Try changing the `position` parameter for `geom_col()`.
 
 ```{r q2-task}
+#original
 mpg %>%
   ggplot(aes(x = cty, y = hwy)) +
   geom_col()
+
+#modified
+mpg %>%
+  ggplot(aes(x = cty, y = hwy)) +
+  geom_col(position = 'dodge')
 ```
 
 **Observations**:
-- Write your observations here!
+- with the bars stacked on top of each other, the hwy gas mileage of the most prevalent cars looks way too high. When we split them with 'dodge' then we get to see what is actually going on at each fuel mileage.
 
 A more standard way to visualize this kind of data is a *scatterplot*, which
 we'll study later. For now, here's an example of a more effective way to
@@ -85,7 +98,8 @@ mpg %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- SUVs are most prevalent
+- 2-seaters are least prevalent and are salmon-colored
 
 ```{r q4-v2}
 ## TODO: Run this code without changing, describe your observations on the data
@@ -95,12 +109,16 @@ mpg %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- Not only are SUVs most common but they are mostly 4wd
+- All pickup trucks are 4wd
+- All minivans are fwd
+- All 2 seaters are rwd.
 
 **Compare `v1` and `v2`**:
 
 - Which visualization---`v1` or `v2`---enabled you to make more observations?
 - What was the difference between `v1` and `v2`?
+- There was an additional dimension of data plotted on v2 relative to v1. They're both pretty, but v2 is more informative. 
 
 __q4__ The following code has a bug; it does not do what its author intended.
 Identify and fix the bug. What does the resulting graph tell you about the
@@ -110,14 +128,22 @@ relation between `manufacturer` and `class` of cars in this dataset?
 do this in a future exercise.
 
 ```{r q4-task}
+#original
 mpg %>%
   ggplot(aes(x = manufacturer, fill = class), position = "dodge") +
   geom_bar() +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 0))
+
+#modified
+mpg %>%
+  ggplot(aes(x = manufacturer, fill = class)) +
+  geom_bar(position = 'dodge') +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 0))
 ```
 
 **Observations**
-- Your observations here!
+- Not only is "Dodge" an unfortunate name collision, but it was in the ggplot call instead of the geom_bar call.
+- This does not actually set the position correct and doesn't seem to throw an error either.
 
 __q5__ The following graph is hard to read. What other form of faceting would
 make the visual more convenient to read? Modify the code below with your
@@ -127,9 +153,9 @@ suggested improvement.
 mpg %>%
   ggplot(aes(x = cyl)) +
   geom_bar() +
-  facet_grid(~ manufacturer)
+  facet_wrap(~ manufacturer)
 ```
-
+facet_wrap
 <!-- include-exit-ticket -->
 # Exit Ticket
 <!-- -------------------------------------------------- -->

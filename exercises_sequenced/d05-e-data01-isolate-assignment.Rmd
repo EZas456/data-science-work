@@ -31,6 +31,8 @@ __q1__ Select all the variables whose name ends with `_time`.
 
 ```{r q1-task}
 ## df_q1 <- TODO: Your code goes here!
+df_q1 <- flights %>%
+  select(ends_with("_time"))
 df_q1
 ```
 
@@ -73,17 +75,19 @@ __q3__ Fix the following code. What is the mistake here? What is the code trying
 to accomplish?
 
 ```{r q3-task}
-## flights %>% filter(dest = "BOS") # Uncomment and run to see error
+flights %>% filter(dest == "BOS") # Uncomment and run to see error
 ```
+= != ==
 
 The next error is *far more insidious*....
 
 __q4__ This code doesn't quite what the user intended. What went wrong?
 
 ```{r q4-task}
-BOS <- "LGA"
-flights %>% filter(dest == BOS)
+#"BOS" <- "LGA"
+flights %>% filter(dest == "BOS", origin == "LGA")
 ```
+Gotta have those quotations. I can only assume that the user was looking for flights from LGA to BOS but assigned the value "LGA" to the object BOS.
 
 It will take practice to get used to when and when not to use quotations. Don't
 worry---we'll get lots of practice!
@@ -96,6 +100,10 @@ __q5__ Perform **two** filters; first
 ```{r q5-task}
 ## df_q5a <- dest is JFK, LGA, or EWR
 ## df_q5b <- origin is JFK, LGA, or EWR
+df_q5a <- flights %>%
+  filter(dest == "JFK" | dest == "LGA" | dest == "EWR")
+df_q5b <- flights %>%
+  filter(origin == "JFK" | origin == "LGA" | origin == "EWR")
 ```
 
 Use the following code to check your answer.
@@ -132,8 +140,14 @@ __q6__ Sort the flights in *descending* order by their `air_time`. Bring
 
 ```{r q6-task}
 ## df_q6 <- TODO: Your code here!
+df_q6 <-
+  flights %>%
+  select(air_time, dest, everything()) %>%
+  arrange(desc(air_time))
 df_q6
 ```
+We see that the longest flights are to Honolulu which is indeed, very far away. Duration is consistent with my experience going home to see family.
+
 
 ```{r q6-tests}
 ## NOTE: No need to change this!
