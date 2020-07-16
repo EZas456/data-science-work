@@ -1,7 +1,7 @@
 ---
 title: "RMS Titanic"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 15 July 2020
 output:
   github_document:
     toc: true
@@ -56,11 +56,16 @@ __q1__ Perform a glimpse of `df_titanic`. What variables are in this dataset?
 
 ```{r q1-task}
 ## TASK: Perform a `glimpse` of df_titanic
+glimpse(df_titanic)
 ```
 
 **Observations**:
 
-- List the variables here
+- Class
+- Sex
+- Age
+- Survived
+- n
 
 __q2__ Skim the [Wikipedia article](https://en.wikipedia.org/wiki/RMS_Titanic) on the RMS Titanic, and look for a total count of passengers. Compare against the total computed below. Are there any differences? Are those differences large or small? What might account for those differences?
 
@@ -72,7 +77,7 @@ df_titanic %>% summarize(total = sum(n))
 
 **Observations**:
 
-- Write your observations here
+- The wikipedia article states that 2224 passengers and crew were aboard. This difference is 23. This relatively small difference (~1%) could be attributed to the fact that some passengers that bought tickets didn't show for various reasons while others left part-way through the journey.
 
 __q3__ Create a plot showing the count of passengers who *did* survive, along with aesthetics for `Class` and `Sex`. Document your observations below.
 
@@ -80,11 +85,20 @@ __q3__ Create a plot showing the count of passengers who *did* survive, along wi
 
 ```{r q3-task}
 ## TASK: Visualize counts against `Class` and `Sex`
+df_titanic %>%
+  filter(Survived == "Yes") %>%
+  ggplot() +
+  geom_col(mapping = aes(x = Class, y = n, fill = Sex))
+  #facet_wrap( ~ sex)
 ```
 
 **Observations**:
 
-- Write your observations here
+- We can see that there are more male crew members that survived the incident than females
+- More females survived in 1st and 2nd class
+- About equal proportions survived in 3rd class
+- There are less second-class people that survived of any class
+- How are these data skewed by the number of people in each class to begin with?
 
 # Deeper Look
 <!-- -------------------------------------------------- -->
@@ -110,22 +124,88 @@ df_prop
 __q4__ Replicate your visual from q3, but display `Prop` in place of `n`. Document your observations, and note any new/different observations you make in comparison with q3.
 
 ```{r q4-task}
+df_prop %>%
+  filter(Survived == "Yes") %>%
+  ggplot() +
+  geom_col(mapping = aes(x = Class, y = Prop, fill = Sex))
+  #facet_wrap( ~ sex)
 ```
 
 **Observations**:
 
-- Write your observations here.
+- It seems that the prop variable is totaled by each combination of class, age and sex so when viewed like this, the prop value is kind of meaningless. 
+- If we re-compute the totals we can get more accurate proportions at this depth of analysis (see figure q4-task_b)
+- If we split the data like in the q5 plot, we get a better idea of what is going on proportionally.
+
+```{r q4-task_b}
+df_prop_class <-
+  df_titanic %>%
+  group_by(Class, Sex) %>%
+  mutate(
+    Total = sum(n),
+    Prop = n / Total
+  ) %>%
+  ungroup()
+df_prop_class
+
+df_prop_class %>%
+  filter(Survived == "Yes") %>%
+  ggplot() +
+  geom_col(mapping = aes(x = Class, y = Prop, fill = Sex), position = 'dodge')
+```
+
+**Observations**:
+
+- Here, since we changed the way we calculate the proportions by grouping, we can clearly see what proportion of sexes in each class are survivors. 
+- We can clearly see that females had much higher survival rate than their male counterparts in each class.
+- 3rd class was still lowest-survival at about 37% survival for females and about 13% for males.
+- Almost all females in 1st class survived and about 87% of female crw members survived while 75% of 2nd class females survived.
 
 __q5__ Create a plot showing the group-proportion of passengers who *did* survive, along with aesthetics for `Class`, `Sex`, *and* `Age`. Document your observations below.
 
 *Hint*: Don't forget that you can use `facet_grid` to help consider additional variables!
 
 ```{r q5-task}
+df_prop %>%
+  filter(Survived == "Yes") %>%
+  ggplot() +
+  geom_col(mapping = aes(x = Class, y = Prop, fill = Sex), position = 'dodge') +
+  facet_wrap( ~ Age)
 ```
 
 **Observations**:
 
-- Write your observations here.
+- Children had a much higher survival rate than their adult counterparts in 1st and 2nd class.
+- Children in 3rd class were about equal in survival rate to their adult counterparts. 
+- (Thank goodness there were no child crew members)
+- All children in 1st and 2nd class survived (yay)!
+- More female children survived than male children where applicable (3rd class).
+- Hypothesis: "Women and children first" *could* be a mindset that hinders the survival of able-bodied men in this catastrophe. If we assume that is true, which men are most "chivalrous"?
+
+```{r q5-task_chivalry}
+df_prop_chivalry <-
+  df_titanic %>%
+  filter(Age == "Adult") %>%
+  group_by(Class, Sex) %>%
+  mutate(
+    Total = sum(n),
+    Prop = n / Total
+  ) %>%
+  filter(Survived == "Yes") %>%
+  select(-n, -Total)%>%
+  pivot_wider(
+   names_from = Sex,
+   values_from = Prop
+  ) %>%
+  mutate(chivalry = Female / Male)
+df_prop_chivalry
+```
+
+**Summary Observations**
+
+- Overall, more females survived in each class
+- Children in 1st and 2nd class were most likely to survive of all groups
+- From the previous table we can see that for this definition of the "chivalry" metric, the men in 2nd class were 4 to 5x more "chivalrous" than the other classes.
 
 # Notes
 <!-- -------------------------------------------------- -->
