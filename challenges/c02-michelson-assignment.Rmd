@@ -1,7 +1,7 @@
 ---
 title: "Michelson Speed-of-light Measurements"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 18 July 2020
 output:
   github_document:
     toc: true
@@ -102,15 +102,18 @@ Michelson *exactly*; why might this be?
 
 ```{r q1-task}
 ## TODO: Compute summaries
-df_q1 <- NA
+df_q1 <- df_michelson %>% 
+  group_by(Distinctness) %>% 
+  summarize(n = n(), MeanVelocity = mean(Velocity))
 df_q1 %>%
   arrange(desc(Distinctness)) %>%
   knitr::kable()
 ```
 
 **Observations**:
-- Write your observations here!
 - Why might your table differ from Michelson's?
+- I don't believe I applied a temperature adjustment of any sort 
+
 
 The `Velocity` values in the dataset are the speed of light *in air*; Michelson
 introduced a couple of adjustments to estimate the speed of light in a vacuum.
@@ -124,7 +127,10 @@ __q2__ Create a new variable `VelocityVacuum` with the $+92$ km/s adjustment to
 
 ```{r q2-task}
 ## TODO: Adjust the data, assign to df_q2
-df_q2 <- NA
+df_q2 <- df_michelson %>% 
+  mutate(
+    VelocityVacuum = Velocity + 92
+  )
 
 df_q2
 ```
@@ -155,16 +161,67 @@ less than the true error?
 ```{r q3-task}
 ## TODO: Compare Michelson's estimate and error against the true value
 ## Your code here!
+LIGHTSPEED_MINUS= c(
+  LIGHTSPEED_VACUUM,
+  LIGHTSPEED_MICHELSON - LIGHTSPEED_PM
+)
+LIGHTSPEED_PLUS= c(
+  LIGHTSPEED_VACUUM,
+  LIGHTSPEED_MICHELSON + LIGHTSPEED_PM
+)
+LIGHTSPEED_MEAN= c(
+  LIGHTSPEED_VACUUM,
+  LIGHTSPEED_MICHELSON
+)
+ESTIMATE = c("LIGHTSPEED_VACUUM", "LIGHTSPEED_MICHELSON")
+df_q3 <- data_frame(ESTIMATE, LIGHTSPEED_MINUS, LIGHTSPEED_MEAN, LIGHTSPEED_PLUS) %>%
+  pivot_longer(-ESTIMATE,
+    names_to = "NAMES",
+    values_to = "LIGHTSPEED"
+    )
+df_q3 %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(
+      x = ESTIMATE, 
+      y = LIGHTSPEED, 
+      )) +
+  ggtitle("Speed of light: Michelson estimate with error and exact value")
 ```
 
 **Observations**:
+- It seems to be that while Michelson had a good idea of what uncertainty he introduced with his measurement techniques (+/- 51 km/sec), the exact speed of light in vacuum is still outside those bounds.
+- It is possible that his setup or process was flawed (compensation for air?) to introduce a constant shift.
 
 __q4__ You have access to a few other variables. Construct a few visualizations
 of `VelocityVacuum` against these other factors. Are there other patterns in the
 data that might help explain the difference between Michelson's estimate and
 `LIGHTSPEED_VACUUM`?
 
+```{r q4-task1}
+df_q2 %>% 
+  ggplot() +
+  geom_smooth(mapping = aes(x = Temp, y = VelocityVacuum), color = "black") +
+  geom_point(mapping = aes(x = Temp, y = VelocityVacuum, color = Distinctness)) +
+  ggtitle("Vacuum-adjusted Michelson speed of light vs. Temperature")
+```
 
+**Observations**:
+- Temperature seems to have an effect on the left and right extremes of the plot but is fairly constant from about 65 to 85 degrees. There are a few outliers (of high distinctness) that pull the data down and up respectively. This could be because he was only able to make measurements in the morning (lower temp measurements) and evening (higher temp measurements) when the atmospheric conditions sub-optimal.
+
+```{r q4-task2}
+df_q2 %>% 
+  ggplot() +
+  geom_density(mapping = aes(x = VelocityVacuum, color = Distinctness)) +
+  #facet_wrap( ~ Distinctness) +
+  ggtitle("Vacuum-adjusted Michelson speed of light with distinctness")
+  #theme(axis.text.x = element_text(angle = 90))
+# df_q2 %>% 
+#   group_by(Distinctness)
+#   summarize(Standard_deviation = sd())
+```
+
+**Observations**:
+- We would expect good distinctness (1) to be the tightest estimate of VelocityVacuum. However, 2 is actually the tightest grouping followed by 1 and then 3. Distinctness itself is therefore not a significant factor in the uncertainty bounds of the measurement.
 
 ## Bibliography
 
