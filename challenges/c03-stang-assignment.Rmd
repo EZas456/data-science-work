@@ -1,7 +1,7 @@
 ---
 title: "Aluminum Data"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 22 July 2020
 output:
   github_document:
     toc: true
@@ -71,8 +71,18 @@ __q1__ Tidy `df_stang` to produce `df_stang_long`. You should have column names 
 ```{r q1-task}
 ## TASK: Tidy `df_stang`
 df_stang_long <-
-  df_stang
-
+  df_stang %>% 
+    pivot_longer(
+      names_to = c(".value", "angle"),
+      names_sep = "_",
+      starts_with("E") | starts_with("mu"),
+      names_transform = list(angle = as.integer)
+    ) %>% 
+  filter(E > 0)
+  # pivot_wider(
+  #   names_from = var, # Cell entries to turn into new column names
+  #   values_from = val # Values to associate with the new column(s)
+  # )
 df_stang_long
 ```
 
@@ -107,20 +117,23 @@ __q2__ Perform a basic EDA on the aluminum data *without visualization*. Use you
 
 ```{r q2-task}
 ##
+df_stang_long %>% 
+    summary()
 ```
 
 **Observations**:
 
 - Is there "one true value" for the material properties of Aluminum?
+There is no "one true value" for the material properties of Aluminum. There is a 
+distribution centered about a mean.
 - How many aluminum alloys were tested? How do you know?
+ There was one alloy tested (al_24st). The summary does not give multiple characters. 
 - What angles were tested?
+Angles were 0, 45 and 90 degrees.
 - What thicknesses were tested?
-- (Write your own question here)
-- No; we see a variety of values for `E` and `mu`.
-- Just one alloy: al_24st
-- Angles: 0, 45, 90 (degrees)
-- Thicknesses: 0.022, 0.032, 0.064, 0.081 (in)
-- I'm curious if the properties `E, mu` vary with thickness
+0.022, 0.032, 0.064, and 0.081
+- Are E and mu always the same for a given thickness?
+No; we see a variety of values for `E` and `mu`.
 
 ## Visualize
 <!-- ------------------------- -->
@@ -129,11 +142,18 @@ __q3__ Create a visualization to investigate your question from q1 above. Can yo
 
 ```{r q3-task}
 ## TASK: Investigate your question from q1 here
+#TODO add units
+df_stang_long %>% 
+  ggplot() +
+  geom_point(aes(x = thick, y = E, color = angle))
+df_stang_long %>% 
+  ggplot() +
+  geom_point(aes(x = thick, y = mu, color = angle))
 ```
 
 **Observations**:
 
-- (Address your question from q1 here)
+- For each thickness, there are multiple different mu and E values. For the answer to be yes, there would have to be a 1-to-1 mapping from mu or E to thickness.
 
 __q4__ Consider the following statement:
 
@@ -147,12 +167,49 @@ df_stang_long %>%
 
   ggplot(aes(mu, E, color = as_factor(thick))) +
   geom_point(size = 3) +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    title= "E vs. mu with Thickness",
+    y= "E (KIPS / in^2)",
+    x = "mu (-)",
+    color = "Thickness (in)"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 **Observations**:
 
-- Does this graph support or contradict the claim above?
+- This graph does tell us that the 0.081 has a slightly different E from the other thicknesses (by about a factor of 5%). However, in order for the data to support the claim that amount of material present *does* affect E, we would like to see a trend where the thickest samples (0.081) performs at some level, the thinnest performs at a different level and the two thicknesses between perform between those levels (in order of thickness). This is not the case, since the second thickest samples are actually closer to the thinnest sample on average than the third thickest. Furthermore, it is a little weird that the value of E (normalized stiffness) is *lower* for the thickest samples.
+
+
+```{r q4-task2}
+## TASK: Another plot for another question
+#How much do the distributions overlap?
+df_stang_long %>% 
+  ggplot() +
+  geom_density(mapping = aes(x = mu, color = as_factor(thick))) +
+  labs(
+    title= "Density of mu with Thickness",
+    y= "Density (-)",
+    x = "mu (-)",
+    color = "Thickness (in)"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+df_stang_long %>% 
+  ggplot() +
+  geom_density(mapping = aes(x = E, color = as_factor(thick))) +
+  labs(
+    title= "Density of E with Thickness",
+    y= "Density (-)",
+    x = "E (KIPS / in^2)",
+    color = "Thickness (in)"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+**Observations**:
+
+- Here, we see that the samples' distributions are overlapping very little for mu in thickness of 0.081. In E we see the same grouping of the thickest samples. However, we cannot draw conclusions about differences between the other samples since they overlap so much. 
 
 # References
 <!-- -------------------------------------------------- -->

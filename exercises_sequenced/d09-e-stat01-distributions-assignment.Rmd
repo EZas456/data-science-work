@@ -11,6 +11,16 @@ reading: 0
 
 *Reading*: (None; this exercise *is* the reading.)
 
+```{r setup, include=FALSE}
+# knitr options
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library}
+library(tidyverse)
+
+```
+
 ## Distributions
 <!-- -------------------------------------------------- -->
 
@@ -63,7 +73,9 @@ __q1__ Modify the code below to evaluate a uniform distribution with `min = -1` 
 ```{r q1-task}
 ## TODO: Complete this code
 df_q1 <-
-  tibble(x = seq(-5, +5, length.out = 100))
+  tibble(x = seq(-5, +5, length.out = 100)) %>%
+  mutate(d = dunif(x, min = -1, max = 1))
+df_q1
 ```
 
 Use the following test to check your answer.
@@ -151,10 +163,15 @@ df_q2 <- map_dfr(
   }
 )
 ## TODO: Create the figure
+df_q2 %>% 
+  ggplot() +
+    geom_density(
+      mapping = aes(x = Z, color = n, group = n)
+    )
 ```
 
 **Observations**
-- Write your observation about the densities and `n` here.
+- The largest values of n seem to look the most "normal".
 
 ## Random Seeds: Setting the State
 <!-- -------------------------------------------------- -->

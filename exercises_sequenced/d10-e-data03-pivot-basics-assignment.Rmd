@@ -63,12 +63,12 @@ cases
 ```
 
 - 1. Country, 2011, 2012, and 2013
-- 2. Country, year, and some unknown quantity (n, count, etc.)
-- 3. FR, DE, and US
+#- 2. Country, year, and some unknown quantity (n, count, etc.)
+#- 3. FR, DE, and US
 
 ```{r q1-test}
 ## TODO: Modify with your answer
-q1_answer <- 0
+q1_answer <- 2
 
 ## NOTE: The following will test your answer
 if (((q1_answer + 56) %% 3 == 1) & (q1_answer > 0)) {
@@ -98,7 +98,7 @@ alloys
 
 ```{r q2-test}
 ## TODO: Modify with your answer
-q2_answer <- 0
+q2_answer <- 3
 
 ## NOTE: The following will test your answer
 if (((q2_answer + 38) %% 3 == 2) & (q2_answer > 0)) {
@@ -289,6 +289,7 @@ df_base <-
          2,      8,  "B",
          3,      7,  "C"
   )
+df_base
 ```
 
 We're going to play a game: I'm going to modify the data, and your job is to
@@ -315,7 +316,11 @@ Undo the modification using a single pivot. Don't worry about column order.
 ```{r q3-task}
 df_q3_res <-
   df_q3 %>%
-## NOTE: Add your pivot here!
+  pivot_wider(
+    names_from = id,
+    names_prefix = "X-",
+    values_from = value
+  )
 
 df_q3_res
 all_equal(df_base, df_q3_res) # Checks equality; returns TRUE if equal
