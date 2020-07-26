@@ -1,7 +1,7 @@
 ---
 title: "Gapminder"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 25 July 2020
 output:
   github_document:
     toc: true
@@ -57,18 +57,29 @@ dataset?
 
 ```{r q0-task}
 ## TASK: Do your "first checks" here!
+glimpse(gapminder)
+summary(gapminder)
 ```
 
 **Observations**:
 
-- Write the variable names here
+- country, continent, year, lifeExp, pop, gdpPercap
 
 __q1__ Determine the most and least recent years in the `gapminder` dataset.
 
 ```{r q1-task}
 ## TASK: Find the largest and smallest values of `year` in `gapminder`
-year_max <- NA_real_
-year_min <- NA_real_
+year_max <- 
+  gapminder %>% 
+  select(year) %>%
+  max()
+year_min <-
+  gapminder %>% 
+  select(year) %>%
+  min()
+
+year_max
+year_min
 ```
 
 Use the following test to check your work.
@@ -86,29 +97,98 @@ __q2__ Filter on years matching `year_min`, and make a plot of the GDE per capit
 
 You may encounter difficulties in visualizing these data; if so document your challenges and attempt to produce the most informative visual you can.
 
-```{r q2-task}
+```{r q2-task-try1}
 ## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = continent, y = gdpPercap))
 ```
 
 **Observations**:
+It's hard to see what is going on with that one asian country all the way up there. We can filter it out to get a better look at the bulk.
 
-- Write your observations here
+```{r q2-task-try2}
+## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(gdpPercap < 30000) %>% 
+  arrange(desc(gdpPercap)) %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = continent, y = gdpPercap)) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+**Observations**:
+We have a visual distribution of the countries binned into their continents at the appropriate GDP levels. Can we represent this better with a column graph?
+
+```{r q2-task-try3}
+## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(gdpPercap < 30000) %>% 
+  group_by(continent) %>% 
+  ggplot() +
+  geom_col(
+    mapping = aes(
+      x = continent,
+      y = fct_reorder(continent, gdpPercap)
+    ),
+    position = 'dodge'
+  )
+  #theme(axis.text.x = element_text(angle = 90))
+```
+**Observations**:
+The anser is: kind of. I tried it without the dodge position initially and they all stacked on top of each other to form a huge stacked mess that didn't make any physical sense. With the dodge position I would expect that countries would each have their own column but that appears to not be the case (it just seems to take the max of that continent). I also tried to arrange them but that didn't seem to work.
+
+```{r q2-task-try4}
+## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(gdpPercap < 30000) %>% 
+  #arrange(desc(gdpPercap)) %>% 
+  #mutate(gdpordered = factor(gdpPercap, levels = gdpPercap)) %>%
+  group_by(continent) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = continent, y = gdpPercap, color = country), position = 'dodge')
+  #theme(axis.text.x = element_text(angle = 90))
+```
+**Observations**:
+This was an odd error I wanted to document. There's just no plot here since the legend is enormous.
+
+```{r q2-task-try5}
+## TASK: Create a visual of gdpPercap vs continent
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(gdpPercap < 30000) %>% 
+  group_by(continent) %>% 
+  ggplot() +
+  geom_boxplot(mapping = aes(x = continent, y = gdpPercap))
+```
+
+**Observations**:
+This one is just a slightly more tractable version of the geom_point. 
 
 **Difficulties & Approaches**:
 
-- Write your challenges and your approach to solving them
+The outliers definitely make it harder to look at the bulk of the countries but we can filter to look at them separately. The column geom would be nice for looking at this sort of thing but I couldn't get the dodge to work properly and even still, there would be too many countries on a single axis to discern them. Even if countries are mapped to a different aesthetic, there are too many of them to see along an axis or in a legend simultaneously.
 
 __q3__ You should have found at least three outliers in q2. Identify those outliers (figure out which countries they are).
 
-*Note*: I realize the reasons for
+*Note*: I realize the reasons for...
 
 ```{r q3-task}
 ## TASK: Identify the outliers from q2
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(gdpPercap > 12000) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = country, y = gdpPercap, fill = pop))
 ```
 
 **Observations**:
 
-- Identify the outlier countries from q2
+All three of them are highly-productive in the senses that GDP measures. Two of them have relatively small populations and one (United States) has a larger population, but still has a high GDP to population ratio. It makes sense to me that Kuwait is an outlier in this way since it is a small, oil-producing country.
 
 __q4__ Create a plot similar to yours from q2 studying both `year_min` and `year_max`. Find a way to highlight the outliers from q3 on your plot. Compare the patterns between `year_min` and `year_max`.
 
@@ -116,11 +196,31 @@ __q4__ Create a plot similar to yours from q2 studying both `year_min` and `year
 
 ```{r q4-task}
 ## TASK: Create a visual of gdpPercap vs continent
+year_min_outliers <- gapminder %>% 
+  filter(
+    year == year_min | year == year_max
+  ) %>% 
+  filter(
+    country == "Kuwait" | country == "Switzerland" | country == "United States"
+  )
+gapminder %>% 
+  filter(
+    year == year_min | year == year_max
+  ) %>% 
+  group_by(continent) %>% 
+  ggplot() +
+  geom_boxplot(mapping = aes(x = continent, y = gdpPercap)) +
+  facet_grid( ~ year) +
+year_min_outliers %>% 
+  geom_point(
+    mapping = aes(x = continent, y = gdpPercap, color = country)
+  ) +
+  theme(axis.text.x = element_text(angle = 90))
 ```
 
 **Observations**:
 
-- Write your observations here
+From the begining to the end of the dataset, Kuwait went from beign far outside of the pack to barely being an outlier. Switzerland has also decreased its "lead" relative to other European countries. The United States, however, appears to at least be the same amount of outlier that it was before relative to the Americas but it is hard to say without doing a % difference from the median American country since countries are on average richer now.
 
 # Your Own EDA
 <!-- -------------------------------------------------- -->
@@ -131,15 +231,94 @@ __q5__ Create *at least* three new figures below. With each figure, try to pose 
 
 ```{r q5-task1}
 ## TASK: Your first graph
+#Hans Rosling style, let's start with looking at life expectancy and GDP per capita (first, for a single year)
+gapminder %>% 
+  filter(year == year_min) %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = gdpPercap, y = lifeExp))
 ```
 
+**Observations**
+That darn Kuwait is pulling our axes away again. Let's explicitly remove it for now.
+
+```{r q5-task1-try2}
+## TASK: Your first graph
+#Hans Rosling style, let's start with looking at life expectancy and GDP per capita (first, for a single year)
+gapminder %>% 
+  filter(year == year_min) %>% 
+  filter(country != "Kuwait") %>% 
+  ggplot() +
+  geom_point(
+    mapping = aes(
+      x = gdpPercap, 
+      y = lifeExp, 
+      color = continent, 
+      size = pop
+    )
+  ) +
+  labs(
+    title= "Population normalized GDP vs. Life Expectancy",
+    y= "Life Expectancy (years)",
+    x = "GDP per capita (PPP$ inflation-adjusted)",
+    color = "Continent",
+    size = "Population (People)"
+  )
+```
+
+**Observations**
+Looks like in 1957, our African and Asian countries are, in general, lower-GDP and lower life expectancy than the other continents. European countries are generally higher life expectancy but span the whole range of GDPs.
 
 ```{r q5-task2}
 ## TASK: Your second graph
+# It would be interesting to see progress over time
+gapminder %>% 
+  filter(country != "Kuwait") %>% 
+  ggplot() +
+  geom_point(
+    mapping = aes(
+      x = gdpPercap, 
+      y = lifeExp, 
+      color = year, 
+      shape = continent
+    )
+  ) +
+  labs(
+    title= "Population normalized GDP vs. Life Expectancy",
+    y= "Life Expectancy (years)",
+    x = "GDP per capita (PPP$ inflation-adjusted log10)",
+    color = "Year",
+    shape = "Continent"
+  ) +
+  scale_x_log10()
 ```
 
+**Observations**
+Looks like over time, countries have, in general, gotten richer and longer-living. Again, we see that the African continent consistently has the lowest life expectancy. 
 
 ```{r q5-task3}
 ## TASK: Your third graph
+#Let's back up that last observation with a clearer visual
+gapminder %>% 
+  filter(str_detect(year, "7")) %>% 
+  group_by(continent) %>% 
+  ggplot() +
+  geom_boxplot(
+    mapping = aes(
+      x = gdpPercap,
+      y = lifeExp, 
+      color = continent, 
+    )
+  ) +
+  facet_grid( ~ year) +
+  labs(
+    title= "Population normalized GDP vs. Life Expectancy",
+    y= "Life Expectancy (years)",
+    x = "GDP per capita (PPP$ inflation-adjusted log10)",
+    color = "Continent"
+  ) +
+  scale_x_log10() +
+  theme(axis.text.x = element_text(angle = 90))
 ```
 
+**Observations**
+As we can see more clearly now, Africa is consistently on the bottom of life expectancy while Europe is almost completely non-overlapping with it. Notably, we see an interesting trend of Asia starting off with a median much closer to Africa's while in the final year, its median is much closer to Europe and the Americas. However, there are still a few outliers in Asia that are the worst or nearly the worst in the dataset.
