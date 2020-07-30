@@ -347,6 +347,12 @@ Check the documentation for `pivot_longer`.
 ```{r q4-task}
 df_q4_res <-
   df_q4 %>%
+  pivot_longer(
+    cols = c(A, B, C),
+    names_to = "key",
+    values_to = "X-0",
+    values_drop_na = TRUE
+  )
 ## NOTE: Add your pivot here!
 
 df_q4_res
@@ -373,6 +379,11 @@ Undo the modification using a single pivot. Don't worry about column order.
 ```{r q5-task}
 df_q5_res <-
   df_q5 %>%
+  pivot_longer(
+    names_to = c(".value", "key"),
+    names_sep = "_",
+    cols = everything()
+  )
 ## NOTE: Add your pivot here!
 
 df_q5_res
@@ -388,6 +399,11 @@ __q6__ Using a single pivot on `df_base` create your own *challenge* dataframe. 
 ## NOTE: No need to edit; this is setup for the exercise
 df_q6 <-
   df_base %>%
+  pivot_longer(
+    cols = -"key",
+    names_to = "name",
+    values_to = "value"
+  )
 ## NOTE: Add your pivot here!
 
 df_q6
@@ -398,6 +414,10 @@ Don't forget to create a solution!
 ```{r q6-solution}
 df_q6_res <-
   df_q6 %>%
+    pivot_wider(
+    names_from = "name",
+    values_from = "value"
+  )
 ## NOTE: Add your pivot here!
 
 df_q6_res
