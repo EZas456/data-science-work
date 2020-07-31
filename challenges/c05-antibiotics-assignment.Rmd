@@ -1,7 +1,7 @@
 ---
 title: "Antibiotics"
-author: "(Your name here)"
-date: 2020-
+author: "Elliott Donlon"
+date: 30 July 2020
 output:
   github_document:
     toc: true
@@ -73,12 +73,31 @@ __q1__ Create a visualization of `df_antibiotics` that helps you to compare the 
 
 ```{r q1-task}
 ## TASK: Create your visualization
+glimpse(df_antibiotics)
+df_antibiotics_tidy <-
+  df_antibiotics %>%
+    pivot_longer(
+      cols = c(-bacteria, -gram),
+      names_to = "antibiotic",
+      values_to = "MIC"
+    )
+
+df_antibiotics_tidy %>% 
+  ggplot() +
+  geom_point(
+    mapping = aes(
+      x = fct_reorder(bacteria, MIC),
+      y = MIC,
+      color = antibiotic,
+      shape = gram)
+  ) +
+  scale_y_log10() +
+  theme(axis.text.x = element_text(angle = 90))
+
 ```
 
 **Observations**:
-
-- Record your observations here
-- Can you make any broad statements about antibiotic effectiveness?
+Streptomycin (blue) and Neomycin (red) seem to be more generally-effective antibiotics than Penicillin (green) for all but both strains of Streptococcus and Diplococcus pneumonia. The four bacteria that Penicillin is least effective on are also not affected very much by the other two antibiotics either. 
 
 ## Purpose: Categorize Bacteria
 <!-- ------------------------- -->
@@ -89,11 +108,27 @@ __q2__ Create a visualization of `df_antibiotics` that helps you to categorize b
 
 ```{r q2-task}
 ## TASK: Create your visualization
+df_antibiotics_tidy %>% 
+  ggplot() +
+  geom_col(
+    mapping = aes(
+      x = MIC,
+      y = fct_reorder(bacteria, MIC),
+      fill = antibiotic
+      ),
+    position = "dodge"
+  ) +
+  facet_grid(gram ~. , scales = "free", labeller = label_both) +
+  #facet_grid(gram~., scales = "free", space = "free", labeller = label_both)
+  scale_x_log10() +
+  geom_vline(aes(xintercept = 0.1)) +
+  theme(axis.text.x = element_text(angle = 90))
+  
 ```
 
 **Observations**:
-
-- Document your observations here!
+We can see that *most* bacteria of the same genus ahve similar responses to antibiotics. The exceptions to that rule are Diplococcus pneumonia which seems to behave similarly to a Streptococcus (but we don't know if Diplococcus in general are similar to Streptococcus), and Streptococcus fecalis. For some reason this particular one does not seem to have data for penicillin or streptomycin.
+Additionally, the gram positive bacteria seem to be much more reactive to penicillin while penicillin seems to be much less effective on gram negative bacteria.
 
 # References
 <!-- -------------------------------------------------- -->
